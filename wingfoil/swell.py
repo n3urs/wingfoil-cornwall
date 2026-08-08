@@ -42,6 +42,23 @@ def _bbox(spots: list[Spot], margin: float = 0.08) -> tuple[float, float, float,
     return (min(lons) - margin, max(lons) + margin, min(lats) - margin, max(lats) + margin)
 
 
+def _has_credentials() -> bool:
+    """Check for credentials without ever calling into copernicusmarine.
+
+    Unauthenticated, `copernicusmarine.subset()` doesn't raise cleanly — it
+    tries an interactive login prompt, which in a non-interactive shell (a CI
+    runner, in particular) just aborts silently without writing the output
+    file. Checking first avoids relying on that undocumented behaviour at all.
+    """
+    import os
+
+    if os.environ.get("COPERNICUSMARINE_SERVICE_USERNAME") and os.environ.get(
+        "COPERNICUSMARINE_SERVICE_PASSWORD"
+    ):
+        return True
+    return (Path.home() / ".copernicusmarine" / ".copernicusmarine-credentials").exists()
+
+
 def _download(spots: list[Spot], days: int) -> dict | None:
     """One subset call covering every spot, parsed into plain JSON-able data.
 
@@ -56,6 +73,9 @@ def _download(spots: list[Spot], days: int) -> dict | None:
     except ImportError:
         return None
 
+    if not _has_credentials():
+        return None
+
     from datetime import datetime, timedelta, timezone
 
     from .tides import UK
@@ -64,8 +84,12 @@ def _download(spots: list[Spot], days: int) -> dict | None:
     start = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
     end = start + timedelta(days=days)
 
-    with tempfile.TemporaryDirectory() as tmp:
-        try:
+    # Everything from here — the download itself, opening the file, parsing
+    # it — is one try/except. A missing/expired credential, a network blip, a
+    # quota limit, a corrupt download: all of it should fall back to
+    # Open-Meteo, not take the whole dashboard build down with it.
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
             cm.subset(
                 dataset_id=DATASET_ID,
                 variables=VARIABLES,
@@ -77,59 +101,60 @@ def _download(spots: list[Spot], days: int) -> dict | None:
                 output_filename="swell.nc",
                 disable_progress_bar=True,
             )
-        except Exception:  # noqa: BLE001 — no creds, no quota, no network: all fall back
-            return None
 
-        ds = xr.open_dataset(Path(tmp) / "swell.nc")
+            ds = xr.open_dataset(Path(tmp) / "swell.nc")
 
-        lats = ds["latitude"].values
-        lons = ds["longitude"].values
-        # Copernicus times are UTC. Convert to Europe/London wall-clock and
-        # format exactly like Open-Meteo's naive local strings ("...T20:00",
-        # no seconds, no offset) so the two sources merge by matching string
-        # keys rather than silently drifting an hour apart during BST.
-        raw_utc = ds["time"].values.astype("datetime64[s]").tolist()
-        times = [
-            t.replace(tzinfo=timezone.utc).astimezone(UK).strftime("%Y-%m-%dT%H:%M")
-            for t in raw_utc
-        ]
-        land = np.isnan(ds["VHM0"].isel(time=0).values)  # (lat, lon) mask, reused per spot
+            lats = ds["latitude"].values
+            lons = ds["longitude"].values
+            # Copernicus times are UTC. Convert to Europe/London wall-clock and
+            # format exactly like Open-Meteo's naive local strings ("...T20:00",
+            # no seconds, no offset) so the two sources merge by matching string
+            # keys rather than silently drifting an hour apart during BST.
+            raw_utc = ds["time"].values.astype("datetime64[s]").tolist()
+            times = [
+                t.replace(tzinfo=timezone.utc).astimezone(UK).strftime("%Y-%m-%dT%H:%M")
+                for t in raw_utc
+            ]
+            land = np.isnan(ds["VHM0"].isel(time=0).values)  # (lat, lon) mask, reused per spot
 
-        out: dict[str, dict] = {}
-        for spot in spots:
-            # 1.5km grid cells right at the coast are often land; walk out to
-            # the nearest wet cell rather than the geometrically nearest one —
-            # the same "nearest usable station" problem tides.py solves.
-            best_i = best_j = None
-            best_d = float("inf")
-            for i, la in enumerate(lats):
-                for j, lo in enumerate(lons):
-                    if land[i, j]:
-                        continue
-                    d = haversine_km(spot.lat, spot.lon, float(la), float(lo))
-                    if d < best_d:
-                        best_d, best_i, best_j = d, i, j
-            if best_i is None:
-                continue
+            out: dict[str, dict] = {}
+            for spot in spots:
+                # 1.5km grid cells right at the coast are often land; walk out
+                # to the nearest wet cell rather than the geometrically
+                # nearest one — the same "nearest usable station" problem
+                # tides.py solves.
+                best_i = best_j = None
+                best_d = float("inf")
+                for i, la in enumerate(lats):
+                    for j, lo in enumerate(lons):
+                        if land[i, j]:
+                            continue
+                        d = haversine_km(spot.lat, spot.lon, float(la), float(lo))
+                        if d < best_d:
+                            best_d, best_i, best_j = d, i, j
+                if best_i is None:
+                    continue
 
-            def series(name: str) -> list[float | None]:
-                vals = ds[name].isel(latitude=best_i, longitude=best_j).values
-                return [None if (v is None or (isinstance(v, float) and math.isnan(v))) else round(float(v), 3) for v in vals]
+                def series(name: str) -> list[float | None]:
+                    vals = ds[name].isel(latitude=best_i, longitude=best_j).values
+                    return [None if (v is None or (isinstance(v, float) and math.isnan(v))) else round(float(v), 3) for v in vals]
 
-            out[spot.id] = {
-                "time": times,
-                "grid_km": round(best_d, 1),
-                "wave_height": series("VHM0"),
-                "wave_direction": series("VMDR"),
-                "wave_period": series("VTPK"),
-                "swell_wave_height": series("VHM0_SW1"),
-                "swell_wave_direction": series("VMDR_SW1"),
-                "swell_wave_period": series("VTM01_SW1"),
-                "wind_wave_height": series("VHM0_WW"),
-                "wind_wave_direction": series("VMDR_WW"),
-                "wind_wave_period": series("VTM01_WW"),
-            }
-        return out
+                out[spot.id] = {
+                    "time": times,
+                    "grid_km": round(best_d, 1),
+                    "wave_height": series("VHM0"),
+                    "wave_direction": series("VMDR"),
+                    "wave_period": series("VTPK"),
+                    "swell_wave_height": series("VHM0_SW1"),
+                    "swell_wave_direction": series("VMDR_SW1"),
+                    "swell_wave_period": series("VTM01_SW1"),
+                    "wind_wave_height": series("VHM0_WW"),
+                    "wind_wave_direction": series("VMDR_WW"),
+                    "wind_wave_period": series("VTM01_WW"),
+                }
+            return out
+    except Exception:  # noqa: BLE001 — no quota, no network, corrupt file: all fall back
+        return None
 
 
 def fetch_swell(spots: list[Spot], days: int = 7) -> tuple[dict[str, dict], list[str]]:

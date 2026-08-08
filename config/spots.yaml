@@ -154,6 +154,35 @@ spots:
       - "NW has a wind shadow for the first 50-100m off the beach."
       - "Limited beach at HW — awkward to rig and launch."
 
+  - id: pendennis
+    name: PENDENNIS POINT
+    lat: 50.1440
+    lon: -5.0426
+    character: estuary
+    swell_exposure: 0.35
+    faces: 170          # compass bearing the open water/swell arrives from
+    wave_school: false
+    wind:
+      ideal: [[191.25, 236.25]]                    # SSW-SW: prevailing, best fetch across Falmouth Bay
+      ok: [[146.25, 191.25], [236.25, 281.25]]     # SE-SSE-S, and WSW-W-WNW
+      gusty: [[236.25, 281.25]]                    # WSW-W-WNW wraps and accelerates round the headland
+      offshore: [[281.25, 56.25]]                  # WNW round through N to NE: off Falmouth town/the docks
+    tide:
+      best: any
+      avoid_hw_hours: 0
+      avoid_lw_hours: 0
+      rising_only: false
+      flow_penalty: 0.35                 # harbour-mouth tidal stream, stronger than Mylor's creek
+    notes:
+      - "DRAFT — no dedicated spot guide found for this one; arcs are estimated from"
+      - "coastline geometry the same way Mylor/Daymer's were. Tune from experience."
+      - "At the mouth of Carrick Roads/the Fal: real Falmouth Bay swell reaches here,"
+      - "unlike Mylor's flat creek water further upstream."
+      - "N-NE wind blows off the docks and sweeps you toward the harbour mouth and"
+      - "the main shipping channel — respect it more than the direction alone suggests."
+      - "Tidal stream and boat/ferry traffic at the harbour mouth are real hazards"
+      - "that don't apply at Mylor."
+
   - id: pentewan
     name: PENTEWAN
     lat: 50.2925
