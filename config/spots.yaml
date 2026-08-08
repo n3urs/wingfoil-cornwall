@@ -156,17 +156,20 @@ spots:
 
   - id: pendennis
     name: PENDENNIS POINT
-    lat: 50.1440
-    lon: -5.0426
+    lat: 50.1487
+    lon: -5.0420
     character: estuary
-    swell_exposure: 0.35
-    faces: 170          # compass bearing the open water/swell arrives from
+    swell_exposure: 0.30
+    faces: 80           # beach faces roughly E, across Carrick Roads toward the Roseland
     wave_school: false
     wind:
-      ideal: [[191.25, 236.25]]                    # SSW-SW: prevailing, best fetch across Falmouth Bay
-      ok: [[146.25, 191.25], [236.25, 281.25]]     # SE-SSE-S, and WSW-W-WNW
-      gusty: [[236.25, 281.25]]                    # WSW-W-WNW wraps and accelerates round the headland
-      offshore: [[281.25, 56.25]]                  # WNW round through N to NE: off Falmouth town/the docks
+      ideal: [[326.25, 56.25], [146.25, 213.75]]   # N-NNE-NE ("up the river") and S-SSW ("out to sea") —
+                                                     # both along the channel, confirmed comfortable
+      ok: [[56.25, 146.25]]                        # NE-ENE-E-ESE-SE: onshore, straight onto the beach —
+                                                     # a long paddle out but workable, not dangerous
+      gusty: []
+      offshore: [[213.75, 326.25]]                 # SW-WSW-W-WNW-NW: blows off the headland itself,
+                                                     # untested — the one direction not vouched for
     tide:
       best: any
       avoid_hw_hours: 0
@@ -174,12 +177,14 @@ spots:
       rising_only: false
       flow_penalty: 0.35                 # harbour-mouth tidal stream, stronger than Mylor's creek
     notes:
-      - "DRAFT — no dedicated spot guide found for this one; arcs are estimated from"
-      - "coastline geometry the same way Mylor/Daymer's were. Tune from experience."
-      - "At the mouth of Carrick Roads/the Fal: real Falmouth Bay swell reaches here,"
-      - "unlike Mylor's flat creek water further upstream."
-      - "N-NE wind blows off the docks and sweeps you toward the harbour mouth and"
-      - "the main shipping channel — respect it more than the direction alone suggests."
+      - "Oscar's own account, 2026-08-08: launches right at the tip of Pendennis Point,"
+      - "the side touching the river (Carrick Roads), not the open-bay side."
+      - "Most directions work. Straight onshore (E) is annoying — long paddle out to"
+      - "get going — but not dangerous. Wind up-river (N-ish) or out to sea (S-ish) is fine."
+      - "W (blowing off the headland itself) hasn't been vouched for — marked offshore"
+      - "as the conservative default until it's actually been tried."
+      - "Coordinates are an estimate for 'the tip, river side' — precise enough for tide"
+      - "station and swell grid cell, but nudge them if the map dot looks wrong."
       - "Tidal stream and boat/ferry traffic at the harbour mouth are real hazards"
       - "that don't apply at Mylor."
 

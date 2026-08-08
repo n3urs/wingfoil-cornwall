@@ -209,11 +209,32 @@ function drawRing() {
   const d = state.data;
   [...ring.querySelectorAll(".spot")].forEach((n) => n.remove());
 
-  const W = ring.clientWidth, H = ring.clientHeight;
-  const cx = W / 2, cy = H / 2;
-  const rx = Math.min(W / 2 - 95, 310), ry = Math.min(H / 2 - 55, 285);
   const ordered = ringOrder(d.spots);
   const n = ordered.length;
+
+  // The mobile breakpoint (<=820px) switches the ring to a static stacked
+  // grid via CSS — don't fight it with an inline pixel size here.
+  const mobile = window.innerWidth <= 820;
+  if (mobile) {
+    ring.style.width = "";
+    ring.style.height = "";
+  }
+
+  // Radius scales with spot count so tiles keep a safe gap as more get added
+  // — a fixed radius tuned for 8 started overlapping the moment a 9th
+  // (Pendennis) showed up. TILE_W matches .spot's CSS width.
+  const TILE_W = 170, TILE_H = 150, MIN_ARC_GAP = 232;
+  const angleStep = (2 * Math.PI) / n;
+  const r = mobile ? 0 : Math.max(230, Math.min(420, MIN_ARC_GAP / angleStep));
+
+  if (!mobile) {
+    ring.style.width = Math.round((r + TILE_W / 2) * 2) + "px";
+    ring.style.height = Math.round((r + TILE_H / 2) * 2) + "px";
+  }
+
+  const W = ring.clientWidth, H = ring.clientHeight;
+  const cx = W / 2, cy = H / 2;
+  const rx = r, ry = r * 0.92;
 
   ordered.forEach((spot, i) => {
     const h = hourAt(spot);
