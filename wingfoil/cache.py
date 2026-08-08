@@ -21,7 +21,7 @@ def get(key: str, max_age_s: float) -> Any | None:
     if not p.exists():
         return None
     try:
-        blob = json.loads(p.read_text())
+        blob = json.loads(p.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         return None
     if time.time() - blob.get("_at", 0) > max_age_s:
@@ -35,11 +35,11 @@ def get_stale(key: str) -> tuple[Any | None, float]:
     if not p.exists():
         return None, 0.0
     try:
-        blob = json.loads(p.read_text())
+        blob = json.loads(p.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         return None, 0.0
     return blob.get("data"), time.time() - blob.get("_at", 0)
 
 
 def put(key: str, data: Any) -> None:
-    _path(key).write_text(json.dumps({"_at": time.time(), "data": data}))
+    _path(key).write_text(json.dumps({"_at": time.time(), "data": data}), encoding="utf-8")

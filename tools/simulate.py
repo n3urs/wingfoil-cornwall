@@ -16,6 +16,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+# Plain Windows consoles default stdout to cp1252, which can't encode the
+# check/cross marks and colour codes below — force UTF-8 so this runs the same
+# on Windows as it does everywhere else.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 from wingfoil.config import COMPASS, load_rider, load_spots  # noqa: E402
 from wingfoil.scoring import score_hour  # noqa: E402
 from wingfoil.tides import UK, TideState  # noqa: E402
@@ -171,8 +177,10 @@ def check() -> int:
     hw = run(20, "SW", "high", 1.0, 10)
     lw = run(20, "SW", "low", 1.0, 10)
     expect(
-        score_of(hw, "marazion") < score_of(lw, "marazion") * 0.5,
-        "Marazion must drop near high water (shore dump at the seawall)",
+        score_of(hw, "marazion") >= score_of(lw, "marazion") * 0.8,
+        "Marazion should not collapse near high water — wingfoilkit.com calls it"
+        " rideable at all states of the tide, and foil launching is actually easiest"
+        " mid-to-high tide (steep shelf, deep quickly vs. a long low-tide wade)",
     )
     ghw = run(18, "W", "high", 1.0, 10)
     gmid = run(18, "W", "mid", 1.0, 10)

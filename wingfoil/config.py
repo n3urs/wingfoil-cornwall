@@ -79,6 +79,10 @@ class Spot:
     # FROM to hit this beach square-on. None for spots sheltered enough that
     # swell direction doesn't matter (estuaries, near-zero swell_exposure).
     faces: float | None = None
+    # Free-form reference guide for the "Guide" panel — access, parking,
+    # hazards, crowd/vibe notes, etc. Passed straight through to the
+    # frontend; None if nothing's been written up for this spot yet.
+    guide: dict | None = None
 
 
 @dataclass
@@ -104,7 +108,7 @@ class Rider:
 
 
 def load_spots(path: Path | None = None) -> list[Spot]:
-    raw = yaml.safe_load((path or CONFIG_DIR / "spots.yaml").read_text())
+    raw = yaml.safe_load((path or CONFIG_DIR / "spots.yaml").read_text(encoding="utf-8"))
     spots = []
     for s in raw["spots"]:
         spots.append(
@@ -131,13 +135,14 @@ def load_spots(path: Path | None = None) -> list[Spot]:
                 ),
                 notes=s.get("notes") or [],
                 faces=float(s["faces"]) if s.get("faces") is not None else None,
+                guide=s.get("guide"),
             )
         )
     return spots
 
 
 def load_rider(path: Path | None = None) -> Rider:
-    raw = yaml.safe_load((path or CONFIG_DIR / "rider.yaml").read_text())
+    raw = yaml.safe_load((path or CONFIG_DIR / "rider.yaml").read_text(encoding="utf-8"))
     ab = raw.get("ability", {})
     ws = raw.get("wave_school", {})
     return Rider(

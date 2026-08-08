@@ -30,6 +30,13 @@
 # swell_exposure   0 = no open-ocean swell reaches here, 1 = full Atlantic
 # character        flatwater | estuary | beach_break — drives the wave-day logic
 # wave_school      true = a sensible place to LEARN wave riding on a clean small day
+#
+# guide            optional — free text for the "Guide" panel in the UI, not used by
+#                   the scoring engine at all. Fields: overview (list of paragraphs),
+#                   ideal_wind, wind_speed, tide, swell, overall, crowds, suitable_for,
+#                   hazards, access, parking (all plain strings), and sources (list of
+#                   site names the guide was collated from). Omit the whole block if
+#                   nothing's been written up yet — the UI just hides the Guide button.
 # ---------------------------------------------------------------------------
 
 spots:
@@ -54,8 +61,13 @@ spots:
       flow_penalty: 0.45                 # ebb rips out of the Camel at up to 8kn
     notes:
       - "Camel estuary ebb runs to 8kn — avoid mid-ebb, it will take you out to sea."
+      - "wingfoilkit.com: worst at MID tide specifically if wind is against tide — rips out"
+      - "and makes balancing/starting tricky. Not just 'avoid ebb', the mid-tide window is"
+      - "the sharpest bit of it."
       - "Very shallow: wade out a fair way before you drop the 900 on."
       - "W is dead onshore and gusty. NW is the money direction."
+      - "Rocks either side of the channel, boat traffic from Rock/Padstow ferries — keep clear."
+      - "Beach can get very busy; at high springs there's not much beach left."
 
   - id: watergate
     name: WATERGATE BAY
@@ -80,6 +92,31 @@ spots:
       - "No beach 2hrs either side of HW — plan the exit before you go out."
       - "Low tide + N wind is the classic: clean wind, waves held up, 4km of sand."
       - "Full Atlantic exposure. Big swell here is a proper washing machine."
+      - "knotnow.co.uk: high cliffs cause wind turbulence near them, on top of the tide"
+      - "cut-off risk — two separate hazards at the same edge of the beach."
+    guide:
+      overview:
+        - >-
+          A two-mile stretch of golden sand just north of Newquay. Home to the Extreme
+          Academy and a major UK kite/wing/surf hub — but big enough that a quiet peak
+          is findable even when the main access point is busy.
+        - >-
+          Picks up more swell than most Cornish beaches, so it's the reliable choice
+          for "real" wave conditions rather than flat water.
+      ideal_wind: "SW, W, NW — the Newquay wave magnet. SW is side-on rather than square."
+      wind_speed: "15-22kn for stable flight and small swell; 25kn+ needs a 3m or smaller wing."
+      tide: "Best at low tide (+/-2hrs). Heavy and hard to launch at full high water."
+      swell: "Punchy waves, clean Atlantic wind."
+      overall: "Excellent. World-class wave destination with massive space and clean Atlantic winds."
+      crowds: "Vibrant, very high — one of the busiest beaches in Cornwall. Zoned areas help manage it."
+      suitable_for: "Intermediate to advanced. Powerful swell and rips require respect and skill."
+      hazards: >-
+        High cliffs cause wind turbulence near them. Being cut off by the tide against
+        the cliffs is a serious risk — always check tide times. No-go for 2-4 hours
+        around high tide.
+      access: "Poseidon Watersports run kite/wing/foil/prone/tow coaching here and elsewhere on request."
+      parking: "Watergate Bay car park, TR8 4AD."
+      sources: ["knotnow.co.uk", "poseidon-watersports.com"]
 
   - id: gwithian
     name: GWITHIAN + GODREVY
@@ -104,6 +141,29 @@ spots:
       - "Mid tide only. HW pins you against the cliff, LW closes out."
       - "Springs come in FAST — you can get cut off from where you launched."
       - "SW-W onshore gives flat sections between the sets. Best wave-learning spot here."
+      - "knotnow.co.uk calls it best at LOW tide (+/-2hrs) with a daunting shore break"
+      - "building as it floods — worth weighing against our own mid-tide-only rule below"
+      - "next time this spot gets re-tuned. For now keeping the firsthand HW/LW veto as-is."
+    guide:
+      overview:
+        - >-
+          A legendary wave-riding destination in St Ives Bay, catching full Atlantic
+          groundswell — long peeling waves that are perfect for surf-foiling.
+          Reliability and clean air draw advanced riders looking for high-performance
+          sessions. Active, passionate local community.
+      ideal_wind: "W, NW — the prevailing winds, and the most consistent."
+      wind_speed: "15-25kn for stable flight; 25-30kn+ for advanced wave riding."
+      tide: "Best at low tide (+/-2hrs). Shore break at high tide is a major gear hazard."
+      swell: "Powerful Atlantic groundswell, 1.0m-2.0m."
+      overall: "Excellent. A world-class wave hub with a deeply expert community."
+      crowds: "Welcoming, moderate. Popular on big forecasts, but the bay is vast."
+      suitable_for: "Advanced. Powerful swell and currents require high-level wave skills."
+      hazards: >-
+        Powerful Atlantic swell, strong tidal currents, submerged rocks near Godrevy,
+        heavy shore break at high tide.
+      access: "Ample parking at the Gwithian dunes; launch from the sandy beach. Sandy bottom."
+      parking: "Gwithian dunes car park."
+      sources: ["knotnow.co.uk"]
 
   - id: bluff
     name: THE BLUFF
@@ -130,6 +190,23 @@ spots:
       - "Best at HIGH tide for foiling — Oscar's own experience, 2026-08-08:"
       - "the low-tide 'sandy lagoons' the guides rate are ankle-to-knee-deep, fine"
       - "for a kite twin-tip but not enough draft for a foil. Hits bottom a lot."
+      - "This is the same spot Poseidon Watersports call 'Hayle Rivermouth' — where the"
+      - "estuary meets the Atlantic. NW riders split between the north side (here, The"
+      - "Bluff) and the south side ('The Poles') or ride between the two."
+    guide:
+      overview:
+        - >-
+          Poseidon Watersports' "location of choice" — often considered the best
+          spot in Britain: a large expanse of varied water where the Hayle estuary
+          meets the Atlantic. As the estuary emerges with NW winds, riders choose
+          the north side (The Bluff, scored here), the south side ("The Poles"), or
+          anywhere between, to find flat water, deep channels, and waves that peel
+          left and right into a predictable shoulder.
+      tide: "Best at high tide for foiling — see Oscar's firsthand note above."
+      hazards: >-
+        Vicious ebb current with deep channels — has caught out competent riders.
+        Requires a Bluff pass and insurance.
+      sources: ["poseidon-watersports.com"]
 
   - id: mylor
     name: MYLOR
@@ -139,10 +216,12 @@ spots:
     swell_exposure: 0.0
     wave_school: false
     wind:
-      ideal: [[281.25, 348.75], [101.25, 168.75]]  # WNW-NW-NNW, and ESE-SE-SSE
-      ok: [[236.25, 281.25], [168.75, 191.25], [348.75, 11.25]]
-      gusty: [[236.25, 281.25]]
-      offshore: [[11.25, 101.25]]
+      # wingfoilkit.com: best N, workable "WNW through NE to S" (i.e. WNW-N-NE-E-SE-S).
+      # SW-W-WSW is the dead zone — flips our old NNE-E offshore call, trust the site.
+      ideal: [[303.75, 33.75], [101.25, 168.75]]   # NW-NNW-N-NNE, and ESE-SE-SSE
+      ok: [[33.75, 101.25], [168.75, 191.25]]      # NE-ENE-E, and S
+      gusty: []
+      offshore: [[191.25, 281.25]]                 # SSW-SW-WSW-W
     tide:
       best: any
       avoid_hw_hours: 0
@@ -153,9 +232,17 @@ spots:
       - "Zero swell, fully sheltered. The safe pick when everywhere else is a mess."
       - "NW has a wind shadow for the first 50-100m off the beach."
       - "Limited beach at HW — awkward to rig and launch."
+      - "Very low tide: shallow for a fair distance out — wade out enough before dropping in."
+      - "Shingle/stony beach with some rocks. Moorings cluster NW of the beach and there's"
+      - "boat traffic near Mylor Yacht Harbour — keep clear of both."
 
   - id: pendennis
-    name: PENDENNIS POINT
+    # Scored at Pendennis Point (Oscar's confirmed launch), but this tile stands in
+    # for "Falmouth" generally — Gyllyngvase and Royal Cornwall Yacht Club are two
+    # other real launch options in the same town, close enough in character that they
+    # don't earn their own scored tile. See guide.alternatives: the Guide panel lists
+    # all three so you can pick the exact spot once you know the wind's roughly right.
+    name: FALMOUTH — PENDENNIS POINT
     lat: 50.1487
     lon: -5.0420
     character: estuary
@@ -187,6 +274,62 @@ spots:
       - "station and swell grid cell, but nudge them if the map dot looks wrong."
       - "Tidal stream and boat/ferry traffic at the harbour mouth are real hazards"
       - "that don't apply at Mylor."
+      - "Gyllyngvase Beach and Royal Cornwall Yacht Club are two other real Falmouth"
+      - "launch options — similar enough not to need their own scored tile, but open"
+      - "the Guide for wind/tide/hazard notes on all three so you can pick the exact spot."
+    guide:
+      overview:
+        - >-
+          This tile is scored at Pendennis Point, but "Falmouth" really has three
+          viable launch points depending on wind direction and what you're after:
+          Pendennis Point itself (river-side, Oscar's own confirmed spot — the
+          numbers this dashboard scores), Gyllyngvase Beach (Falmouth's main
+          beach, S/SE facing), and Royal Cornwall Yacht Club (Carrick Roads,
+          more sheltered, sailable most tides). Check the wind direction against
+          all three below before deciding where to rig.
+      ideal_wind: "N-NNE-NE (up the river) or S-SSW (out to sea) at Pendennis — see alternatives for Gylly/RCYC."
+      tide: "Any state works at Pendennis. See alternatives for Gylly (best low) and RCYC (best high)."
+      hazards: "Harbour-mouth tidal stream and boat/ferry traffic at Pendennis — see each alternative for its own hazards."
+      sources: ["knotnow.co.uk"]
+      alternatives:
+        - name: "Gyllyngvase Beach (Gylly)"
+          overview: >-
+            Falmouth's most popular beach for winging — sheltered relative to the
+            open coast, safer sea state, crystal-clear water and a sandy bottom.
+            Very busy; best off-season or early.
+          ideal_wind: "S, SE (directly into the bay). Viable: SW, SSW, S, SSE, SE, ESE, E."
+          wind_speed: "15-25kn sweet spot; 4-5m wings light air, 3m past 28kn."
+          tide: "Best at low tide (+/-2hrs). Shore break best avoided at high tide with swell running."
+          suitable_for: "Good for intermediates — deep water is great for foilers, but the shore dump needs timing."
+          hazards: "Very high crowds, one of the busiest beaches in Cornwall."
+          # Decorative only — not fed into the scoring engine, just draws this card's
+          # compass/tide-bar in the Guide panel using the same visual language as the
+          # scored spots. ideal = the two named directions; ok = the wider viable list.
+          wind:
+            ideal: [[168.75, 191.25], [123.75, 146.25]]   # S, SE
+            ok: [[78.75, 236.25]]                          # E round through SE-S-SW
+            gusty: []
+            offshore: []
+          tide_rule: { best: low, avoid_hw_hours: 2, avoid_lw_hours: 0, rising_only: false }
+        - name: "Royal Cornwall Yacht Club"
+          overview: >-
+            RYA Champion Club, established 1871, overlooking the Fal Estuary and
+            Carrick Roads — a professional, high-performance-training venue with
+            an elite racing history.
+          ideal_wind: "S, SW, NW — prevailing winds that funnel cleanly along Carrick Roads."
+          wind_speed: "15-25kn sweet spot; 4-5m wings in lighter air."
+          tide: "Sailable at all tides. High tide preferred for easier launch and to avoid the strongest currents."
+          suitable_for: "Good for intermediates — good variety, but currents and traffic need awareness."
+          hazards: "Significant tidal currents in Carrick Roads; heavy yacht/commercial traffic; submerged rocks near headlands; moored vessels."
+          wind:
+            ideal: [[168.75, 191.25], [213.75, 236.25], [303.75, 326.25]]   # S, SW, NW
+            ok: []
+            gusty: []
+            offshore: []
+          tide_rule: { best: high, avoid_hw_hours: 0, avoid_lw_hours: 0, rising_only: false }
+      sub_note: >-
+        Gylly and RCYC aren't independently scored — their wind/tide numbers above
+        are for reference only, not fed into this dashboard's scoring engine.
 
   - id: pentewan
     name: PENTEWAN
@@ -244,17 +387,106 @@ spots:
     faces: 170          # compass bearing the open water/swell arrives from
     wave_school: false
     wind:
-      ideal: [[146.25, 236.25]]                    # SSE-S-SSW-SW
-      ok: [[236.25, 281.25], [101.25, 146.25]]     # WSW-W and ESE-SE: flat but gusty
-      gusty: [[236.25, 281.25], [101.25, 146.25]]
-      offshore: [[281.25, 101.25]]                 # WNW round through N to E
+      # wingfoilkit.com: best WSW, workable "E through S/W to WNW-N". NE-ENE-E is offshore.
+      ideal: [[146.25, 258.75]]                    # SSE-S-SSW-SW-WSW
+      ok: [[258.75, 11.25], [78.75, 146.25]]       # W-WNW-NW-NNW-N, and E-ESE-SE
+      gusty: [[258.75, 303.75], [101.25, 146.25]]  # W-WNW and ESE-SE: flat but gusty
+      offshore: [[11.25, 78.75]]                   # NNE-NE-ENE
     tide:
-      best: low
-      avoid_hw_hours: 2                  # shore dump on the seawall, nowhere to land
+      best: high
+      avoid_hw_hours: 0
       avoid_lw_hours: 0
       rising_only: false
       flow_penalty: 0.0
     notes:
-      - "Do NOT ride 2hrs either side of HW — shore dump at the seawall, no landing space."
-      - "As the tide drops a huge flat shallow sandy playground opens up. That's the session."
-      - "South facing: works when the whole north coast is offshore."
+      - "wingfoilkit.com calls it rideable at all states of the tide — but the shore break"
+      - "at the seawall builds as the tide floods, and gets properly destructive with swell"
+      - "running. Ease off near HW if there's any size in the water."
+      - "Foil launching is easiest mid-to-high tide: the beach shelves steeply and gets deep"
+      - "within a few metres. At low tide it's soft flat sand — a long slog out before there's"
+      - "enough water to foil."
+      - "Concrete outfall in front of the Hoxton Special watersports centre — know where it is."
+      - "Long Rock reef to the west, plus rocky patches exposed at low tide."
+      - "Seaweed in the shore break and on the beach can foul the foil launching/landing."
+    guide:
+      overview:
+        - >-
+          Marazion Station House, opposite St Michael's Mount, is one of Cornwall's
+          iconic watersports spots. South-facing with a stunning backdrop, it works
+          in a wide range of conditions. A Pay & Display car park sits right at the
+          top of the sea wall with toilets, a pub and a cafe on site.
+        - >-
+          The beach changes character with the tide: sand/pebble/shingle up top, a
+          flat shallow sandy playground mid-tide, and a short powerful shore break can
+          build on the shingle bank as the tide floods, especially with swell running.
+        - >-
+          Angus at the Hoxton Special (right of the Station House Inn) is the friendly
+          local face — kite tuition, SUP hire, and up-to-date reports including a live
+          webcam when the centre's open.
+      ideal_wind: "WSW is the single best direction; wide SSE-S-SSW-SW-WSW window works well."
+      wind_speed: "15-25kn is the sweet spot; 4-5m wings in lighter air, 3m past 28kn."
+      tide: >-
+        wingfoilkit.com calls it rideable at all states of the tide, but foil launching
+        is genuinely easiest mid-to-high tide (steep shelf, deep quickly) — at low tide
+        it's a long slog out over soft flat sand.
+      swell: "South-facing — works when the whole north coast is blown out or offshore."
+      overall: "Excellent. Mount's Bay hub with clean winds and a spectacular backdrop."
+      crowds: "Friendly, high. A major community hub, very popular on good forecasts."
+      suitable_for: "Good for all levels. The variety of conditions means there's something for everyone."
+      hazards: >-
+        Concrete outfall in front of the Hoxton Special. Long Rock reef to the west,
+        plus rocky patches at low tide. Seaweed in the shore break can foul a foil.
+        Shore break at the seawall builds as the tide floods and gets destructive with
+        any swell running.
+      access: "Three access points down the sea defences from the car park, most popular next to the Station pub."
+      parking: "Marazion Station car park; also Folly Fields (east) and Long Rock car park (west)."
+      sources: ["wingfoilkit.com", "knotnow.co.uk"]
+
+  - id: helford
+    name: HELFORD RIVER SAILING CLUB
+    lat: 50.0913            # Helford Passage, north bank — estimate, nudge if the map dot looks wrong
+    lon: -5.1265
+    character: estuary
+    swell_exposure: 0.05    # fully sheltered river reach — chop and boat wake only
+    wave_school: false
+    wind:
+      # Oscar's own correction, 2026-08-08: the river runs east-west at Helford
+      # Passage, so it needs an EASTERLY funnelling straight down the valley —
+      # not knotnow.co.uk's S/SW claim (wrong, or describing a different reach).
+      # Wind from the sides gets blocked/turbulent behind the tree-lined banks.
+      ideal: [[78.75, 101.25]]                   # E — square down the valley
+      ok: [[56.25, 78.75], [101.25, 123.75]]     # ENE, ESE
+      gusty: [[56.25, 78.75], [101.25, 123.75]]  # off-axis = wind clipping the trees
+      offshore: []                               # not vouched for as dangerous, just blocked/no wind
+    tide:
+      best: high
+      avoid_hw_hours: 0
+      avoid_lw_hours: 0
+      rising_only: false
+      flow_penalty: 0.25                 # "significant tidal currents" per the guide
+    notes:
+      - "Wind must funnel straight down the river — the valley points due east, so it"
+      - "needs an EASTERLY. Off-axis directions get blocked or turned rough by the"
+      - "tree-lined banks either side."
+      - "Tide numbers still from knotnow.co.uk, 2026-08-08 — untested by Oscar, only the"
+      - "wind direction has been corrected so far."
+      - "High tide (+/-2hrs) is best — optimal depth and easier launching."
+      - "Numerous rocky patches/mudflats and moored vessels — narrow channels, know the layout."
+    guide:
+      overview:
+        - >-
+          Helford River Sailing Club, established 1948, sits at Helford Passage on the
+          north bank of the River Helford — a sheltered estuary environment with a mix
+          of flat-water reaches and manageable tidal currents. Famous for its scenery
+          and peaceful atmosphere: a scenic "cruising" playground for exploring the
+          river reaches in a protected coastal setting.
+      ideal_wind: "E — square down the valley. Off-axis wind gets blocked or turned gusty by the tree-lined banks."
+      wind_speed: "12-18kn for beginners; 20-28kn for advanced."
+      tide: "Best at high tide (+/-2hrs) — optimal depth and easier launching."
+      swell: "Estuary chop and boat wake only."
+      overall: "Excellent. A stunningly beautiful maritime hub with a focus on traditional sailing."
+      crowds: "Friendly, low. A welcoming village club with supportive local membership — rarely crowded, but boat moorings are numerous."
+      suitable_for: "Good for intermediates. Currents and mud require awareness."
+      hazards: "Significant tidal currents in the Helford; numerous rocky patches/mudflats; moored vessels; narrow channels."
+      access: "Helford Passage, north bank of the River Helford."
+      sources: ["knotnow.co.uk"]

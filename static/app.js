@@ -557,7 +557,9 @@ function drawDetail() {
     : `no window above 55 — peaks ${dayRow.best_score} at ${String(dayRow.peak_hour).padStart(2, "0")}:00`;
 
   $("detail").innerHTML =
-    `<h3>${esc(spot.name)}</h3>` +
+    `<div class="detail-head"><h3>${esc(spot.name)}</h3>` +
+    (spot.guide ? `<button class="btn guide-btn" id="guide-btn">Guide</button>` : "") +
+    `</div>` +
     `<div class="sub">${tab.is_today && tab.partial ? "Rest of today" : esc(dayRow.label)} · ${windowTxt}` +
     `${state.pinnedHour ? ` · showing ${String(h.hour).padStart(2, "0")}:00` : ""}</div>` +
     `<div class="sub" style="margin-top:-12px">${esc(spot.character.replace("_", " "))} · tides from ${esc(spot.tide_station || spot.tide_source || "—")} · ${esc(swellSourceLabel(spot))}</div>` +
@@ -569,6 +571,10 @@ function drawDetail() {
       (h.reasons || []).map((r) => `<li>${esc(r)}</li>`).join("") +
     `</ul>` +
     `<div class="notes"><ul class="reasons">${spot.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>`;
+
+  if (spot.guide) {
+    $("guide-btn").onclick = () => openGuide(spot);
+  }
 
   // Clicking an hour pins the whole board to it; clicking it again releases
   // back to the day overview.
@@ -812,9 +818,200 @@ function swellSourceLabel(spot) {
   return "swell data unavailable";
 }
 
+// --------------------------------------------------------------- guide modal
+
+// A wind rose for the Guide panel: colours the actual scored ideal/ok/offshore
+// arcs onto a compass ring, gusty arcs get a hatched outline on top. Draws
+// straight from wind_rule (the real scoring input), not re-parsed guide prose.
+function windRoseSVG(wind, size = 148) {
+  if (!wind) return "";
+  const C = size / 2, R = C - 20, RIN = R - 20;
+  const pt = (deg, rad) => [
+    C + rad * Math.sin((deg * Math.PI) / 180),
+    C - rad * Math.cos((deg * Math.PI) / 180),
+  ];
+  const ringSeg = (from, to, rOuter, rInner) => {
+    let a0 = ((from % 360) + 360) % 360;
+    let a1 = ((to % 360) + 360) % 360;
+    if (a1 <= a0) a1 += 360;
+    const large = a1 - a0 > 180 ? 1 : 0;
+    const [x0o, y0o] = pt(a0, rOuter);
+    const [x1o, y1o] = pt(a1, rOuter);
+    const [x1i, y1i] = pt(a1, rInner);
+    const [x0i, y0i] = pt(a0, rInner);
+    return `M ${x0o} ${y0o} A ${rOuter} ${rOuter} 0 ${large} 1 ${x1o} ${y1o} `
+      + `L ${x1i} ${y1i} A ${rInner} ${rInner} 0 ${large} 0 ${x0i} ${y0i} Z`;
+  };
+  const band = (arcs, rOuter, rInner, fill, extra = "") =>
+    (arcs || []).map(([a, b]) => `<path d="${ringSeg(a, b, rOuter, rInner)}" fill="${fill}" ${extra}/>`).join("");
+
+  const ticks = [0, 90, 180, 270].map((b) => {
+    const [x, y] = pt(b, R + 11);
+    const label = ["N", "E", "S", "W"][b / 90];
+    return `<text x="${x}" y="${y + 4}" text-anchor="middle" fill="${b === 0 ? "var(--buff)" : "var(--dim)"}" font-size="10.5" font-weight="600" letter-spacing="1">${label}</text>`;
+  }).join("");
+
+  return `
+    <svg class="wind-rose" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+      <defs>
+        <pattern id="gusty-hatch" width="5" height="5" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="5" stroke="var(--bg)" stroke-width="2.2"/>
+        </pattern>
+      </defs>
+      <circle cx="${C}" cy="${C}" r="${R}" fill="var(--panel-2)" stroke="var(--line)"/>
+      ${band(wind.offshore, R, RIN, "#ff6b6b", 'opacity=".85"')}
+      ${band(wind.ok, R, RIN, "var(--marginal)", 'opacity=".9"')}
+      ${band(wind.ideal, R, RIN, "var(--go)")}
+      ${band(wind.gusty, R, RIN, "url(#gusty-hatch)", 'opacity=".55"')}
+      <circle cx="${C}" cy="${C}" r="${RIN}" fill="var(--bg-deep)"/>
+      ${ticks}
+    </svg>`;
+}
+
+function windRoseLegend(wind) {
+  const rows = [
+    [wind?.ideal?.length, "var(--go)", "Ideal"],
+    [wind?.ok?.length, "var(--marginal)", "OK"],
+    [wind?.gusty?.length, null, "Gusty"],
+    [wind?.offshore?.length, "#ff6b6b", "Offshore — avoid"],
+  ].filter(([n]) => n);
+  return `<div class="wind-legend">` + rows.map(([, col, label]) =>
+    `<span class="wl-item">${col ? `<span class="wl-dot" style="background:${col}"></span>` : `<span class="wl-dot wl-hatch"></span>`}${label}</span>`
+  ).join("") + `</div>`;
+}
+
+// A LOW→HIGH tide bar. avoid_hw/lw_hours are converted to a width using the
+// ~6.2h half-cycle (low to high) as the scale, so "2 hours either side of HW"
+// reads as roughly a third of the bar — approximate, but the point is the
+// shape at a glance, not the exact minute.
+function tideBarHTML(tide) {
+  if (!tide) return "";
+  const HALF_CYCLE_H = 6.2;
+  const pct = (h) => Math.max(0, Math.min(50, (h / HALF_CYCLE_H) * 50));
+  const hwPct = pct(tide.avoid_hw_hours || 0);
+  const lwPct = pct(tide.avoid_lw_hours || 0);
+  const bestZone = { low: [0, 34], mid: [33, 67], high: [66, 100], any: [0, 100] }[tide.best] || [0, 100];
+
+  const avoidHw = hwPct > 0
+    ? `<div class="tide-avoid" style="right:0;width:${hwPct}%" title="Avoid ~${tide.avoid_hw_hours}h either side of HW"></div>` : "";
+  const avoidLw = lwPct > 0
+    ? `<div class="tide-avoid" style="left:0;width:${lwPct}%" title="Avoid ~${tide.avoid_lw_hours}h either side of LW"></div>` : "";
+
+  const caption = [
+    `Best: ${tide.best === "any" ? "any state" : tide.best.toUpperCase()}`,
+    tide.avoid_hw_hours ? `avoid ~${tide.avoid_hw_hours}h either side of HW` : null,
+    tide.avoid_lw_hours ? `avoid ~${tide.avoid_lw_hours}h either side of LW` : null,
+    tide.rising_only ? "rising tide only — ebb is dangerous here" : null,
+  ].filter(Boolean).join(" · ");
+
+  return `
+    <div class="tide-bar-wrap">
+      <div class="tide-bar">
+        <div class="tide-best" style="left:${bestZone[0]}%;width:${bestZone[1] - bestZone[0]}%"></div>
+        ${avoidLw}${avoidHw}
+      </div>
+      <div class="tide-labels"><span>LOW</span><span>MID</span><span>HIGH</span></div>
+      <div class="tide-caption">${esc(caption)}</div>
+    </div>`;
+}
+
+const GUIDE_GRID_FIELDS = [
+  ["ideal_wind", "Wind direction"],
+  ["wind_speed", "Wind speed"],
+  ["tide", "Tide"],
+  ["swell", "Swell"],
+  ["overall", "Overall"],
+  ["crowds", "Vibe & crowds"],
+  ["suitable_for", "Suitable for"],
+];
+const GUIDE_SECTION_FIELDS = [
+  ["hazards", "Hazards"],
+  ["access", "Access"],
+  ["parking", "Parking"],
+];
+
+// Wind rose + tide bar side by side — the "at a glance" summary, drawn from
+// real arc/tide data when there is any (wind/tideRule), not from guide prose.
+function visualsHTML(windRule, tideRule, roseSize) {
+  if (!windRule && !tideRule) return "";
+  const hasWind = windRule && (windRule.ideal?.length || windRule.ok?.length || windRule.offshore?.length);
+  return `<div class="guide-visuals">` +
+    (hasWind ? `<div class="gv-wind">${windRoseSVG(windRule, roseSize)}${windRoseLegend(windRule)}</div>` : "") +
+    (tideRule ? `<div class="gv-tide">${tideBarHTML(tideRule)}</div>` : "") +
+    `</div>`;
+}
+
+// A mini version of the same grid, used for guide.alternatives — other real
+// launch options at the same general spot (e.g. Falmouth: Pendennis Point is
+// scored, Gylly and RCYC are listed here so you can pick the exact spot once
+// the wind direction's roughly right).
+function altCard(alt) {
+  const grid = GUIDE_GRID_FIELDS
+    .filter(([key]) => alt[key])
+    .map(([key, label]) => `<div><div class="k">${label}</div><div class="v">${esc(alt[key])}</div></div>`)
+    .join("");
+  return (
+    `<div class="guide-alt">` +
+    `<div class="guide-alt-name">${esc(alt.name)}</div>` +
+    (alt.overview ? `<p class="guide-p">${esc(alt.overview)}</p>` : "") +
+    visualsHTML(alt.wind, alt.tide_rule, 118) +
+    (grid ? `<div class="guide-grid">${grid}</div>` : "") +
+    (alt.hazards ? `<div class="guide-section"><div class="k">Hazards</div><div class="v">${esc(alt.hazards)}</div></div>` : "") +
+    `</div>`
+  );
+}
+
+function openGuide(spot) {
+  const g = spot.guide;
+  if (!g) return;
+
+  const overview = (g.overview || []).map((p) => `<p class="guide-p">${esc(p)}</p>`).join("");
+  const grid = GUIDE_GRID_FIELDS
+    .filter(([key]) => g[key])
+    .map(([key, label]) => `<div><div class="k">${label}</div><div class="v">${esc(g[key])}</div></div>`)
+    .join("");
+  const sections = GUIDE_SECTION_FIELDS
+    .filter(([key]) => g[key])
+    .map(([key, label]) => `<div class="guide-section"><div class="k">${label}</div><div class="v">${esc(g[key])}</div></div>`)
+    .join("");
+  const sources = (g.sources || []).length
+    ? `<div class="guide-sources">Sources: ${g.sources.map(esc).join(", ")}</div>`
+    : "";
+  const alternatives = (g.alternatives || []).length
+    ? `<div class="guide-section">` +
+      `<div class="k">Other launch options here</div>` +
+      (g.sub_note ? `<p class="guide-p" style="margin-top:6px">${esc(g.sub_note)}</p>` : "") +
+      g.alternatives.map(altCard).join("") +
+      `</div>`
+    : "";
+
+  $("guide-body").innerHTML =
+    `<h3 class="guide-title" id="guide-title">${esc(spot.name)}</h3>` +
+    sources +
+    (overview || `<p class="guide-empty">No write-up yet — see the notes below the day chart.</p>`) +
+    visualsHTML(spot.wind_rule, spot.tide_rule) +
+    (grid ? `<div class="guide-grid">${grid}</div>` : "") +
+    sections +
+    alternatives;
+
+  $("guide-overlay").hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeGuide() {
+  $("guide-overlay").hidden = true;
+  document.body.style.overflow = "";
+}
+
+$("guide-close").onclick = closeGuide;
+$("guide-overlay").onclick = (e) => {
+  if (e.target === $("guide-overlay")) closeGuide();
+};
+
 $("refresh").onclick = () => load();
 document.addEventListener("keydown", (e) => {
-  if (!state.data) return;
+  if (e.key === "Escape" && !$("guide-overlay").hidden) { closeGuide(); return; }
+  if (!state.data || !$("guide-overlay").hidden) return;
   const n = (state.data.day_tabs || []).length;
   if (e.key === "ArrowRight" && state.day < n - 1) { state.day++; state.pinnedHour = false; render(); }
   if (e.key === "ArrowLeft" && state.day > 0) { state.day--; state.pinnedHour = false; render(); }

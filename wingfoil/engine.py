@@ -181,12 +181,13 @@ def build_dashboard(days: int = 7, demo: dict | None = None) -> dict:
                 else:
                     over = True
             peak = max(daylight, key=lambda x: x["score"])
+            d = datetime.fromisoformat(date)
             day_rows.append(
                 {
                     "date": date,
-                    "label": datetime.fromisoformat(date).strftime("%a %-d %b"),
-                    "short": datetime.fromisoformat(date).strftime("%a"),
-                    "daynum": datetime.fromisoformat(date).strftime("%-d %b"),
+                    "label": f"{d.strftime('%a')} {d.day} {d.strftime('%b')}",
+                    "short": d.strftime("%a"),
+                    "daynum": f"{d.day} {d.strftime('%b')}",
                     "is_today": date == today,
                     "partial": partial,
                     "over": over,
@@ -217,6 +218,21 @@ def build_dashboard(days: int = 7, demo: dict | None = None) -> dict:
                 "lon": spot.lon,
                 "character": spot.character,
                 "notes": spot.notes,
+                "guide": spot.guide,
+                # The actual scoring inputs, for the Guide panel's compass/tide-bar —
+                # drawn from what the engine really uses, not re-parsed guide prose.
+                "wind_rule": {
+                    "ideal": spot.wind.ideal,
+                    "ok": spot.wind.ok,
+                    "gusty": spot.wind.gusty,
+                    "offshore": spot.wind.offshore,
+                },
+                "tide_rule": {
+                    "best": spot.tide.best,
+                    "avoid_hw_hours": spot.tide.avoid_hw_hours,
+                    "avoid_lw_hours": spot.tide.avoid_lw_hours,
+                    "rising_only": spot.tide.rising_only,
+                },
                 "tide_source": ts.source if ts else None,
                 "tide_station": ts.station if ts else None,
                 "swell_source": "copernicus" if sw else ("open-meteo" if m else None),
@@ -272,7 +288,7 @@ def build_dashboard(days: int = 7, demo: dict | None = None) -> dict:
 
     return {
         "generated_at": now.isoformat(),
-        "generated_label": now.strftime("%a %-d %b, %H:%M"),
+        "generated_label": f"{now.strftime('%a')} {now.day} {now.strftime('%b')}, {now.strftime('%H:%M')}",
         "rider": {
             "weight_kg": rider.weight_kg,
             "foil": rider.foil_label,
