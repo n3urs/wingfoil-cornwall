@@ -1,0 +1,12 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+httpx>=0.27
+pyyaml>=6.0
+python-dotenv>=1.0
+
+# Copernicus Marine 1.5km wave model (wingfoil/swell.py). Optional at runtime —
+# swell.py catches the ImportError and falls back to Open-Meteo — but part of
+# the default environment since it's the better swell source when set up.
+# Needs `copernicusmarine login` once (see README) to actually pull data.
+copernicusmarine>=2.0
+xarray>=2024.1

@@ -1,0 +1,41 @@
+# You. Change this if you buy kit, change weight, or your ability moves on.
+
+weight_kg: 80
+
+foil:
+  front_wing_cm2: 900
+  label: "900"
+
+# Wind ranges in knots for each wing you own.
+# min/max are the absolute edges; lo/hi are the "nicely powered" sweet spot.
+# These are calibrated for 80kg on a 900cm2 front wing.
+wings:
+  - size: "6m"
+    min: 11
+    lo: 13
+    hi: 21
+    max: 25
+  - size: "4m"
+    min: 18
+    lo: 21
+    hi: 31
+    max: 38
+
+# Ability profile.
+#   high_wind_tolerance: 1.0 = totally happy maxed out on the 4m in 35kn.
+#                        Lower it to punish strong-wind days.
+#   wave_confidence:     0.0 = flat water only. 1.0 = wants it big.
+#                        Low values make the dashboard prefer flat/sheltered spots
+#                        and only flag waves when they're small and clean.
+#   gust_tolerance:      1.0 = doesn't mind gusty. 0.0 = hates it.
+ability:
+  high_wind_tolerance: 1.0
+  wave_confidence: 0.3
+  gust_tolerance: 0.7
+
+# A "wave school day" is a wave spot where the swell is small and clean enough
+# that it's a sensible day to actually go and learn to ride. These get a badge.
+wave_school:
+  min_wave_m: 0.6
+  max_wave_m: 1.6
+  min_period_s: 8

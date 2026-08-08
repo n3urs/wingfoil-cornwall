@@ -1,0 +1,224 @@
+# Cornwall wing foiling spot rules.
+#
+# EDIT THIS FILE as you learn each spot — it is the whole brain of the dashboard.
+# Nothing else needs changing to re-tune the scoring.
+#
+# ---------------------------------------------------------------------------
+# wind.ideal / wind.ok / wind.gusty
+#   Arcs of wind ORIGIN direction in degrees, clockwise, [from, to].
+#   Arcs may wrap through 0 (e.g. [303.75, 11.25] means NW -> NNW -> N).
+#
+#   Arcs are snapped to 16-point compass sector boundaries so the label the
+#   dashboard shows always agrees with how it scored. The sector edges are
+#   multiples of 22.5 offset by 11.25:
+#     N   348.75-11.25    NE   33.75-56.25    E   78.75-101.25   SE  123.75-146.25
+#     NNE  11.25-33.75    ENE  56.25-78.75    ESE 101.25-123.75  SSE 146.25-168.75
+#     S   168.75-191.25   SW  213.75-236.25   W   258.75-281.25  NW  303.75-326.25
+#     SSW 191.25-213.75   WSW 236.25-258.75   WNW 281.25-303.75  NNW 326.25-348.75
+#   Keep to these numbers when you edit, or a spot can read "NW" and still score
+#   as merely "ok".
+#   ideal -> 1.00   ok -> 0.62   outside both -> tapers to 0 over 15 deg
+#   gusty -> multiplies the direction score by 0.85 (side/offshore over land)
+#   offshore -> hard safety cap; score is capped at 0.25 and a warning is shown
+#
+# tide.best        one of: any | low | mid | high
+# tide.avoid_hw_hours / avoid_lw_hours
+#                  hours either side of HW/LW where the spot is unusable (0 = off)
+# tide.rising_only true = ebb is dangerous here, ebb scores are crushed
+# tide.flow_penalty  0-1, how badly strong mid-tide tidal stream hurts this spot
+#
+# swell_exposure   0 = no open-ocean swell reaches here, 1 = full Atlantic
+# character        flatwater | estuary | beach_break — drives the wave-day logic
+# wave_school      true = a sensible place to LEARN wave riding on a clean small day
+# ---------------------------------------------------------------------------
+
+spots:
+  - id: daymer
+    name: DAYMER BAY
+    lat: 50.5620
+    lon: -4.9270
+    character: estuary
+    swell_exposure: 0.25
+    faces: 320          # compass bearing the open water/swell arrives from
+    wave_school: false
+    wind:
+      ideal: [[303.75, 11.25], [168.75, 236.25]]   # NW-NNW-N, and S-SSW-SW
+      ok: [[258.75, 303.75], [11.25, 33.75]]       # W-WNW (dead onshore), NNE
+      gusty: [[258.75, 303.75]]
+      offshore: [[33.75, 146.25]]                  # NE-E-SE blows off the land
+    tide:
+      best: any
+      avoid_hw_hours: 0
+      avoid_lw_hours: 0
+      rising_only: false
+      flow_penalty: 0.45                 # ebb rips out of the Camel at up to 8kn
+    notes:
+      - "Camel estuary ebb runs to 8kn — avoid mid-ebb, it will take you out to sea."
+      - "Very shallow: wade out a fair way before you drop the 900 on."
+      - "W is dead onshore and gusty. NW is the money direction."
+
+  - id: watergate
+    name: WATERGATE BAY
+    lat: 50.4430
+    lon: -5.0430
+    character: beach_break
+    swell_exposure: 1.0
+    faces: 300          # compass bearing the open water/swell arrives from
+    wave_school: true
+    wind:
+      ideal: [[258.75, 11.25]]                     # W-WNW-NW-NNW-N: N holds the waves up clean
+      ok: [[168.75, 258.75]]                       # S-SSW-SW-WSW
+      gusty: []
+      offshore: [[11.25, 168.75]]                  # NNE round to SSE
+    tide:
+      best: low
+      avoid_hw_hours: 2                  # beach disappears at HW
+      avoid_lw_hours: 0
+      rising_only: false
+      flow_penalty: 0.0
+    notes:
+      - "No beach 2hrs either side of HW — plan the exit before you go out."
+      - "Low tide + N wind is the classic: clean wind, waves held up, 4km of sand."
+      - "Full Atlantic exposure. Big swell here is a proper washing machine."
+
+  - id: gwithian
+    name: GWITHIAN + GODREVY
+    lat: 50.2225
+    lon: -5.3920
+    character: beach_break
+    swell_exposure: 0.95
+    faces: 340          # compass bearing the open water/swell arrives from
+    wave_school: true
+    wind:
+      ideal: [[213.75, 326.25]]                    # SW-WSW-W-WNW-NW, onshore with flat sections
+      ok: [[326.25, 11.25], [191.25, 213.75]]      # NNW-N, SSW
+      gusty: []
+      offshore: [[11.25, 191.25]]                  # NNE round to S = off the land
+    tide:
+      best: mid
+      avoid_hw_hours: 1.5                # HW puts you into the cliff
+      avoid_lw_hours: 1.5                # LW closes out
+      rising_only: false
+      flow_penalty: 0.0
+    notes:
+      - "Mid tide only. HW pins you against the cliff, LW closes out."
+      - "Springs come in FAST — you can get cut off from where you launched."
+      - "SW-W onshore gives flat sections between the sets. Best wave-learning spot here."
+
+  - id: bluff
+    name: THE BLUFF
+    lat: 50.1935
+    lon: -5.4055
+    character: flatwater
+    swell_exposure: 0.15
+    wave_school: false
+    wind:
+      ideal: [[303.75, 56.25]]                     # NW-NNW-N-NNE-NE
+      ok: [[258.75, 303.75]]                       # W-WNW
+      gusty: []
+      offshore: [[56.25, 258.75]]
+    tide:
+      best: low
+      avoid_hw_hours: 0
+      avoid_lw_hours: 0
+      rising_only: false
+      flow_penalty: 0.40                 # estuary ebb is exceptionally strong
+    notes:
+      - "REQUIRES a Bluff pass + insurance — sort that before your first session."
+      - "Tucked inside the estuary arm: flat when Gwithian next door is pumping."
+      - "Ebb current is vicious and has caught out competent riders. Deep channels."
+      - "Sandy lagoons appear as the tide drops — this is the flat-water session."
+
+  - id: mylor
+    name: MYLOR
+    lat: 50.1745
+    lon: -5.0535
+    character: flatwater
+    swell_exposure: 0.0
+    wave_school: false
+    wind:
+      ideal: [[281.25, 348.75], [101.25, 168.75]]  # WNW-NW-NNW, and ESE-SE-SSE
+      ok: [[236.25, 281.25], [168.75, 191.25], [348.75, 11.25]]
+      gusty: [[236.25, 281.25]]
+      offshore: [[11.25, 101.25]]
+    tide:
+      best: any
+      avoid_hw_hours: 0
+      avoid_lw_hours: 0
+      rising_only: false
+      flow_penalty: 0.10
+    notes:
+      - "Zero swell, fully sheltered. The safe pick when everywhere else is a mess."
+      - "NW has a wind shadow for the first 50-100m off the beach."
+      - "Limited beach at HW — awkward to rig and launch."
+
+  - id: pentewan
+    name: PENTEWAN
+    lat: 50.2925
+    lon: -4.7855
+    character: flatwater
+    swell_exposure: 0.35
+    faces: 140          # compass bearing the open water/swell arrives from
+    wave_school: false
+    wind:
+      ideal: [[33.75, 146.25]]                     # NE-ENE-E-ESE-SE: the easterly spot
+      ok: [[146.25, 191.25], [11.25, 33.75]]       # SSE-S, NNE
+      gusty: []
+      offshore: [[191.25, 11.25]]                  # SSW round through W to N
+    tide:
+      best: low
+      avoid_hw_hours: 0
+      avoid_lw_hours: 0
+      rising_only: false
+      flow_penalty: 0.0
+    notes:
+      - "South coast: this is where you go when an easterly kills the north coast."
+      - "Flat sandy launch appears as the tide drops. Watch for onshore swell."
+      - "Park in the village, walk down through the sailing club. Busy in summer."
+
+  - id: crantock
+    name: CRANTOCK
+    lat: 50.4115
+    lon: -5.1130
+    character: beach_break
+    swell_exposure: 0.85
+    faces: 285          # compass bearing the open water/swell arrives from
+    wave_school: true
+    wind:
+      ideal: [[258.75, 303.75]]                    # W-WNW
+      ok: [[213.75, 258.75], [303.75, 326.25]]     # SW-WSW, NW
+      gusty: []
+      offshore: [[56.25, 191.25]]                  # ENE round to S = off the land
+    tide:
+      best: any
+      avoid_hw_hours: 0
+      avoid_lw_hours: 0
+      rising_only: true                  # HARD RULE — see notes
+      flow_penalty: 0.30
+    notes:
+      - "RISING TIDE ONLY. On the ebb the beach joins the Gannel and sweeps you out to sea."
+      - "W wind is the one. Wave riding with a flat river section to retreat to."
+
+  - id: marazion
+    name: MARAZION
+    lat: 50.1245
+    lon: -5.4735
+    character: flatwater
+    swell_exposure: 0.45
+    faces: 170          # compass bearing the open water/swell arrives from
+    wave_school: false
+    wind:
+      ideal: [[146.25, 236.25]]                    # SSE-S-SSW-SW
+      ok: [[236.25, 281.25], [101.25, 146.25]]     # WSW-W and ESE-SE: flat but gusty
+      gusty: [[236.25, 281.25], [101.25, 146.25]]
+      offshore: [[281.25, 101.25]]                 # WNW round through N to E
+    tide:
+      best: low
+      avoid_hw_hours: 2                  # shore dump on the seawall, nowhere to land
+      avoid_lw_hours: 0
+      rising_only: false
+      flow_penalty: 0.0
+    notes:
+      - "Do NOT ride 2hrs either side of HW — shore dump at the seawall, no landing space."
+      - "As the tide drops a huge flat shallow sandy playground opens up. That's the session."
+      - "South facing: works when the whole north coast is offshore."

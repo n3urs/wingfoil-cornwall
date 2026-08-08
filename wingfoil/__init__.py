@@ -1,0 +1,1 @@
+"""Cornwall wing foiling dashboard."""

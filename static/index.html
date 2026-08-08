@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cornwall Wing Foiling</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<svg class="seabed" id="seabed" aria-hidden="true"></svg>
+
+<header class="topbar">
+  <div class="verdict" id="verdict">
+    <div class="verdict-head" id="verdict-head">Loading…</div>
+    <div class="verdict-sub" id="verdict-sub">Fetching wind, swell and tides</div>
+  </div>
+  <div class="topbar-right">
+    <div class="sources" id="sources"></div>
+    <div class="kit" id="kit"></div>
+    <button id="refresh" class="btn">Refresh</button>
+  </div>
+</header>
+
+<nav class="daybar" id="daybar" aria-label="Choose a day"></nav>
+
+<main>
+  <section class="ring-wrap">
+    <aside class="mapcard">
+      <div class="mapcard-h">Cornwall</div>
+      <svg id="map" aria-label="Map of the spots"></svg>
+      <div class="mapcard-f" id="map-caption">—</div>
+    </aside>
+    <div class="ring" id="ring">
+      <svg class="dial" id="dial" viewBox="0 0 320 320" aria-label="Wind direction and speed"></svg>
+    </div>
+  </section>
+
+  <section class="detail" id="detail"></section>
+
+  <section class="week">
+    <h2>Next 7 days <span class="dim">— best score each day, click a cell to jump there</span></h2>
+    <div class="week-grid" id="week-grid"></div>
+  </section>
+
+  <section class="warnings" id="warnings"></section>
+</main>
+
+<script src="/static/coast.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
