@@ -14,12 +14,37 @@ const state = {
 // data
 // --------------------------------------------------------------------------
 
+// Works two ways: against the live FastAPI server (./run.sh — full live
+// data, ?demo= works) and as a published static site (GitHub Pages — reads
+// the dashboard.json a scheduled Action last built, no demo mode since
+// there's no server to compute one on demand). Relative paths throughout so
+// this resolves correctly whether the site is served from a domain root or
+// a Pages project subpath like /wingfoil-cornwall/.
+async function fetchDashboard() {
+  const demo = new URLSearchParams(location.search).get("demo");
+  try {
+    const r = await fetch("api/dashboard" + (demo ? `?demo=${encodeURIComponent(demo)}` : ""));
+    if (r.ok) return await r.json();
+  } catch (e) { /* no live server here — fall through to the static snapshot */ }
+
+  if (demo) {
+    throw new Error("Demo mode needs the local server (./run.sh) — not available on the published site.");
+  }
+  const r2 = await fetch("dashboard.json");
+  if (!r2.ok) throw new Error(`Could not load dashboard.json (${r2.status})`);
+  return await r2.json();
+}
+
 async function load() {
   $("verdict-head").textContent = "Loading…";
-  // Pass ?demo=18,225,1.2,10 through to the API to preview made-up conditions.
-  const demo = new URLSearchParams(location.search).get("demo");
-  const r = await fetch("/api/dashboard" + (demo ? `?demo=${encodeURIComponent(demo)}` : ""));
-  const d = await r.json();
+  let d;
+  try {
+    d = await fetchDashboard();
+  } catch (e) {
+    $("verdict-head").textContent = "Error";
+    $("verdict-sub").textContent = e.message;
+    return;
+  }
   if (d.error) {
     $("verdict-head").textContent = "Error";
     $("verdict-sub").textContent = d.error;

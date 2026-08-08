@@ -118,7 +118,7 @@ spots:
       gusty: []
       offshore: [[56.25, 258.75]]
     tide:
-      best: low
+      best: high
       avoid_hw_hours: 0
       avoid_lw_hours: 0
       rising_only: false
@@ -127,7 +127,9 @@ spots:
       - "REQUIRES a Bluff pass + insurance — sort that before your first session."
       - "Tucked inside the estuary arm: flat when Gwithian next door is pumping."
       - "Ebb current is vicious and has caught out competent riders. Deep channels."
-      - "Sandy lagoons appear as the tide drops — this is the flat-water session."
+      - "Best at HIGH tide for foiling — Oscar's own experience, 2026-08-08:"
+      - "the low-tide 'sandy lagoons' the guides rate are ankle-to-knee-deep, fine"
+      - "for a kite twin-tip but not enough draft for a foil. Hits bottom a lot."
 
   - id: mylor
     name: MYLOR

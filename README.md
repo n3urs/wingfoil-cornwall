@@ -15,6 +15,10 @@ Then open **http://localhost:8787**.
 First run builds a virtualenv and installs dependencies (~30s). After that it
 starts instantly.
 
+Or skip running anything locally — it's published at
+**https://n3urs.github.io/wingfoil-cornwall/**, rebuilt every 3 hours by a
+GitHub Action. Bookmark that instead. See [Publishing it](#publishing-it).
+
 ---
 
 ## The tide API key
@@ -58,6 +62,35 @@ total, distant swell, and local wind-chop — rather than one blended number.
 Without it the dashboard still works, silently using Open-Meteo's swell data
 instead, same posture as the tide key. The **status box** top-right of the
 header shows which one you're actually getting for each source, live.
+
+---
+
+## Publishing it
+
+**https://n3urs.github.io/wingfoil-cornwall/** — bookmark it, use it from any
+device, nothing to start. A GitHub Action rebuilds it every 3 hours (`.github/
+workflows/pages.yml`), on every push to `main`, and on demand from the
+Actions tab's "Run workflow" button.
+
+It's the same dashboard, computed by the same code (`tools/build_static.py`
+just calls `build_dashboard()` and writes the result to a static
+`dashboard.json` next to the page) — everything works identically **except**
+`?demo=` conditions, which need a live server to compute on the spot.
+
+For the published copy to use the good data sources rather than silently
+falling back to Open-Meteo everywhere, add these as **repo secrets**
+(Settings → Secrets and variables → Actions → New repository secret) —
+optional, same fallback posture as running it locally without them:
+
+| Secret | Value |
+|---|---|
+| `ADMIRALTY_API_KEY` | your Admiralty primary key |
+| `COPERNICUSMARINE_SERVICE_USERNAME` | your Copernicus Marine username |
+| `COPERNICUSMARINE_SERVICE_PASSWORD` | your Copernicus Marine password |
+
+**GitHub Pages needs a public repo** on the free plan — private repos need
+GitHub Pro or above. Nothing sensitive is tracked (`.env` is gitignored,
+`.env.example` is blank), so this repo is public.
 
 ---
 
